@@ -1,0 +1,966 @@
+<!DOCTYPE html>
+<html lang="hi">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Bijli Mitra - Smart Energy Dashboard</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Noto+Sans+Devanagari:wght@400;500;600;700&family=Inter:wght@400;500;600;700&display=swap');
+        
+        body {
+            font-family: 'Inter', 'Noto Sans Devanagari', sans-serif;
+        }
+        
+        .hindi-text {
+            font-family: 'Noto Sans Devanagari', sans-serif;
+        }
+        
+        .screen {
+            display: none;
+        }
+        
+        .screen.active {
+            display: block;
+        }
+        
+        .progress-bar {
+            background: linear-gradient(90deg, #10b981 0%, #10b981 33.33%, #e5e7eb 33.33%, #e5e7eb 100%);
+        }
+        
+        .chart-bar {
+            transition: width 0.8s ease-in-out;
+        }
+        
+        .card-hover {
+            transition: transform 0.2s ease-in-out, box-shadow 0.2s ease-in-out;
+        }
+        
+        .card-hover:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 10px 25px rgba(0, 0, 0, 0.1);
+        }
+        
+        .animate-fade-in {
+            animation: fadeIn 0.6s ease-in-out;
+        }
+        
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(20px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+        
+        .gradient-bg {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+        }
+    </style>
+</head>
+<body class="bg-gray-50 min-h-screen">
+    <!-- Navigation Header -->
+    <div class="bg-white shadow-sm border-b border-gray-200 sticky top-0 z-50">
+        <div class="max-w-6xl mx-auto px-4 py-3 flex items-center justify-between">
+            <button onclick="goBack()" class="text-blue-600 hover:text-blue-700 flex items-center" id="backBtn" style="display: none;">
+                <svg class="w-5 h-5 mr-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 19l-7-7 7-7"></path>
+                </svg>
+                Back
+            </button>
+            <div class="text-lg font-bold text-blue-600">Bijli Mitra</div>
+            <button onclick="clearData()" class="text-red-500 hover:text-red-700 text-sm">Reset Demo</button>
+        </div>
+    </div>
+
+    <!-- Screen 1: Landing Page -->
+    <div id="landing" class="screen active">
+        <div class="max-w-md mx-auto px-6 py-8">
+            <!-- Logo and Title -->
+            <div class="text-center mb-8">
+                <div class="w-20 h-20 bg-gradient-to-br from-blue-500 to-green-500 rounded-full mx-auto mb-4 flex items-center justify-center">
+                    <svg class="w-10 h-10 text-white" fill="currentColor" viewBox="0 0 24 24">
+                        <path d="M13 2L3 14h9l-1 8 10-12h-9l1-8z"/>
+                    </svg>
+                </div>
+                <h1 class="text-3xl font-bold text-gray-800 mb-2">Bijli Mitra</h1>
+                <p class="text-lg text-gray-600 hindi-text">समझिये, Compare कीजिये, और बिजली Bill बचाइये!</p>
+            </div>
+
+            <!-- Illustration -->
+            <div class="bg-blue-50 rounded-2xl p-6 mb-8">
+                <div class="flex items-center justify-center">
+                    <svg class="w-48 h-32" viewBox="0 0 200 120" fill="none">
+                        <!-- House -->
+                        <rect x="60" y="60" width="80" height="50" fill="#8B5CF6" rx="4"/>
+                        <polygon points="50,60 100,30 150,60" fill="#6366F1"/>
+                        <!-- Door -->
+                        <rect x="85" y="85" width="15" height="25" fill="#4F46E5"/>
+                        <!-- Windows -->
+                        <rect x="70" y="70" width="12" height="12" fill="#60A5FA"/>
+                        <rect x="118" y="70" width="12" height="12" fill="#60A5FA"/>
+                        <!-- Power lines -->
+                        <line x1="20" y1="40" x2="180" y2="40" stroke="#374151" stroke-width="2"/>
+                        <circle cx="100" cy="40" r="3" fill="#10B981"/>
+                        <!-- Family -->
+                        <circle cx="40" cy="85" r="8" fill="#F59E0B"/>
+                        <rect x="35" y="93" width="10" height="15" fill="#3B82F6"/>
+                        <circle cx="160" cy="85" r="8" fill="#EF4444"/>
+                        <rect x="155" y="93" width="10" height="15" fill="#EC4899"/>
+                    </svg>
+                </div>
+                <p class="text-center text-sm text-gray-600 mt-4 hindi-text">AI की मदद से अपना बिजली का बिल कम करें</p>
+            </div>
+
+            <!-- Action Buttons -->
+            <div class="space-y-4">
+                <button onclick="showScreen('login')" class="w-full bg-blue-600 hover:bg-blue-700 text-white font-semibold py-4 px-6 rounded-xl text-lg flex items-center justify-center space-x-2 transition-colors">
+                    <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M11 16l-4-4m0 0l4-4m-4 4h14m-5 4v1a3 3 0 01-3 3H6a3 3 0 01-3-3V7a3 3 0 013-3h7a3 3 0 013 3v1"></path>
+                    </svg>
+                    <span>Start Demo / डेमो शुरू करें</span>
+                </button>
+                
+                <button onclick="checkExistingData()" class="w-full bg-green-600 hover:bg-green-700 text-white font-semibold py-4 px-6 rounded-xl text-lg flex items-center justify-center space-x-2 transition-colors">
+                    <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z"></path>
+                    </svg>
+                    <span>View Dashboard / डैशबोर्ड देखें</span>
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Screen 2: Login Page -->
+    <div id="login" class="screen">
+        <div class="max-w-md mx-auto px-6 py-8">
+            <div class="text-center mb-8">
+                <h2 class="text-2xl font-bold text-gray-800 mb-2">Enter Your Details</h2>
+                <p class="text-gray-600 hindi-text">अपनी जानकारी दें</p>
+            </div>
+
+            <form class="space-y-6" onsubmit="saveUserData(event)">
+                <div>
+                    <label class="block text-sm font-medium text-gray-700 mb-2">Name / नाम</label>
+                    <input type="text" id="userName" class="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent text-lg" placeholder="अपना नाम लिखें" required>
+                </div>
+
+                <div>
+                    <label class="block text-sm font-medium text-gray-700 mb-2">Phone Number / फोन नंबर</label>
+                    <input type="tel" id="userPhone" class="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent text-lg" placeholder="+91 98765 43210" required>
+                </div>
+
+                <div>
+                    <label class="block text-sm font-medium text-gray-700 mb-2">City / शहर</label>
+                    <input type="text" id="userCity" class="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent text-lg" placeholder="अपना शहर लिखें" required>
+                </div>
+
+                <button type="submit" class="w-full bg-blue-600 hover:bg-blue-700 text-white font-semibold py-4 px-6 rounded-xl text-lg transition-colors">
+                    Continue / आगे बढ़ें
+                </button>
+            </form>
+        </div>
+    </div>
+
+    <!-- Screen 3: Bill Upload Page -->
+    <div id="upload" class="screen">
+        <div class="max-w-md mx-auto px-6 py-8">
+            <div class="text-center mb-8">
+                <h2 class="text-2xl font-bold text-gray-800 mb-2">Upload Bills</h2>
+                <p class="text-gray-600 hindi-text">अपने पिछले 3 बिजली के बिल अपलोड करें</p>
+            </div>
+
+            <!-- Progress Bar -->
+            <div class="mb-8">
+                <div class="flex justify-between text-sm text-gray-600 mb-2">
+                    <span>Progress / प्रगति</span>
+                    <span id="progressText">0/3</span>
+                </div>
+                <div class="w-full bg-gray-200 rounded-full h-3">
+                    <div id="progressBar" class="bg-blue-500 h-3 rounded-full transition-all duration-500" style="width: 0%"></div>
+                </div>
+            </div>
+
+            <!-- Demo Bills Button -->
+            <div class="mb-6">
+                <button onclick="useDemoBills()" class="w-full bg-gradient-to-r from-purple-500 to-pink-500 hover:from-purple-600 hover:to-pink-600 text-white font-semibold py-4 px-6 rounded-xl text-lg flex items-center justify-center space-x-2 transition-colors">
+                    <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 10V3L4 14h7v7l9-11h-7z"></path>
+                    </svg>
+                    <span>Use Demo Bills / डेमो बिल उपयोग करें</span>
+                </button>
+            </div>
+
+            <div class="text-center text-gray-500 mb-6">
+                <span class="hindi-text">या</span> / OR
+            </div>
+
+            <!-- Upload Options -->
+            <div class="space-y-4 mb-8">
+                <button onclick="uploadBill('camera')" class="w-full border-2 border-dashed border-gray-300 hover:border-blue-400 rounded-xl p-8 text-center transition-colors">
+                    <svg class="w-12 h-12 text-gray-400 mx-auto mb-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 9a2 2 0 012-2h.93a2 2 0 001.664-.89l.812-1.22A2 2 0 0110.07 4h3.86a2 2 0 011.664.89l.812 1.22A2 2 0 0018.07 7H19a2 2 0 012 2v9a2 2 0 01-2 2H5a2 2 0 01-2-2V9z"></path>
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 13a3 3 0 11-6 0 3 3 0 016 0z"></path>
+                    </svg>
+                    <p class="text-lg font-medium text-gray-700">Take Photo</p>
+                    <p class="text-sm text-gray-500 hindi-text">फोटो खींचें</p>
+                </button>
+
+                <button onclick="uploadBill('gallery')" class="w-full border-2 border-dashed border-gray-300 hover:border-blue-400 rounded-xl p-8 text-center transition-colors">
+                    <svg class="w-12 h-12 text-gray-400 mx-auto mb-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z"></path>
+                    </svg>
+                    <p class="text-lg font-medium text-gray-700">Choose from Gallery</p>
+                    <p class="text-sm text-gray-500 hindi-text">गैलरी से चुनें</p>
+                </button>
+            </div>
+
+            <!-- Uploaded Bills -->
+            <div id="uploadedBills" class="space-y-3 mb-8">
+                <!-- Bills will be added here dynamically -->
+            </div>
+
+            <button onclick="showScreen('appliances')" id="continueBtn" class="w-full bg-blue-600 hover:bg-blue-700 text-white font-semibold py-4 px-6 rounded-xl text-lg transition-colors opacity-50 cursor-not-allowed" disabled>
+                Continue / आगे बढ़ें
+            </button>
+        </div>
+    </div>
+
+    <!-- Screen 4: Appliance & Usage Form -->
+    <div id="appliances" class="screen">
+        <div class="max-w-md mx-auto px-6 py-8">
+            <div class="text-center mb-8">
+                <h2 class="text-2xl font-bold text-gray-800 mb-2">Home Details</h2>
+                <p class="text-gray-600 hindi-text">अपने घर की जानकारी दें</p>
+            </div>
+
+            <form class="space-y-8" onsubmit="saveApplianceData(event)">
+                <!-- Family Members -->
+                <div class="bg-white rounded-xl p-6 shadow-sm border border-gray-100">
+                    <div class="flex items-center mb-4">
+                        <div class="w-10 h-10 bg-blue-100 rounded-lg flex items-center justify-center mr-3">
+                            <svg class="w-6 h-6 text-blue-600" fill="currentColor" viewBox="0 0 24 24">
+                                <path d="M16 4c0-1.11.89-2 2-2s2 .89 2 2-.89 2-2 2-2-.89-2-2zm4 18v-6h2.5l-2.54-7.63A1.5 1.5 0 0 0 18.5 7h-5c-.8 0-1.5.7-1.5 1.5v6c0 .8.7 1.5 1.5 1.5H15v4h5zM12.5 11.5c.83 0 1.5-.67 1.5-1.5s-.67-1.5-1.5-1.5S11 9.17 11 10s.67 1.5 1.5 1.5zM5.5 6c1.11 0 2-.89 2-2s-.89-2-2-2-2 .89-2 2 .89 2 2 2zm2 16v-7H9V9c0-1.1-.9-2-2-2H4c-1.1 0-2 .9-2 2v6h1.5v7h4z"/>
+                            </svg>
+                        </div>
+                        <div>
+                            <h3 class="text-lg font-semibold text-gray-800">Family Members</h3>
+                            <p class="text-sm text-gray-500 hindi-text">परिवार के सदस्य</p>
+                        </div>
+                    </div>
+                    <select id="familyMembers" class="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 text-lg" required>
+                        <option value="">Select / चुनें</option>
+                        <option value="1-2">1-2 members</option>
+                        <option value="3-4">3-4 members</option>
+                        <option value="5-6">5-6 members</option>
+                        <option value="7+">7+ members</option>
+                    </select>
+                </div>
+
+                <!-- Fans -->
+                <div class="bg-white rounded-xl p-6 shadow-sm border border-gray-100">
+                    <div class="flex items-center mb-4">
+                        <div class="w-10 h-10 bg-purple-100 rounded-lg flex items-center justify-center mr-3">
+                            <svg class="w-6 h-6 text-purple-600" fill="currentColor" viewBox="0 0 24 24">
+                                <path d="M12,11A1,1 0 0,0 13,12A1,1 0 0,0 12,13A1,1 0 0,0 11,12A1,1 0 0,0 12,11M12.5,2C13,2 13.5,2.19 13.86,2.55C14.22,2.91 14.41,3.4 14.41,3.86C14.41,4.31 14.22,4.8 13.86,5.16C13.5,5.52 13,5.71 12.5,5.71C12,5.71 11.5,5.52 11.14,5.16C10.78,4.8 10.59,4.31 10.59,3.86C10.59,3.4 10.78,2.91 11.14,2.55C11.5,2.19 12,2 12.5,2M12.5,18.29C13,18.29 13.5,18.48 13.86,18.84C14.22,19.2 14.41,19.69 14.41,20.14C14.41,20.6 14.22,21.09 13.86,21.45C13.5,21.81 13,22 12.5,22C12,22 11.5,21.81 11.14,21.45C10.78,21.09 10.59,20.6 10.59,20.14C10.59,19.69 10.78,19.2 11.14,18.84C11.5,18.48 12,18.29 12.5,18.29M6,8A2,2 0 0,1 8,6A2,2 0 0,1 10,8A2,2 0 0,1 8,10A2,2 0 0,1 6,8M14,16A2,2 0 0,1 16,14A2,2 0 0,1 18,16A2,2 0 0,1 16,18A2,2 0 0,1 14,16Z"/>
+                            </svg>
+                        </div>
+                        <div>
+                            <h3 class="text-lg font-semibold text-gray-800">Fans</h3>
+                            <p class="text-sm text-gray-500 hindi-text">कितने पंखे हैं?</p>
+                        </div>
+                    </div>
+                    <select id="fans" class="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 text-lg" required>
+                        <option value="">Select / चुनें</option>
+                        <option value="0">0 fans</option>
+                        <option value="1-2">1-2 fans</option>
+                        <option value="3-4">3-4 fans</option>
+                        <option value="5+">5+ fans</option>
+                    </select>
+                </div>
+
+                <!-- Bulbs -->
+                <div class="bg-white rounded-xl p-6 shadow-sm border border-gray-100">
+                    <div class="flex items-center mb-4">
+                        <div class="w-10 h-10 bg-yellow-100 rounded-lg flex items-center justify-center mr-3">
+                            <svg class="w-6 h-6 text-yellow-600" fill="currentColor" viewBox="0 0 24 24">
+                                <path d="M12,2A7,7 0 0,0 5,9C5,11.38 6.19,13.47 8,14.74V17A1,1 0 0,0 9,18H15A1,1 0 0,0 16,17V14.74C17.81,13.47 19,11.38 19,9A7,7 0 0,0 12,2M9,21A1,1 0 0,0 10,22H14A1,1 0 0,0 15,21V20H9V21Z"/>
+                            </svg>
+                        </div>
+                        <div>
+                            <h3 class="text-lg font-semibold text-gray-800">Bulbs/Lights</h3>
+                            <p class="text-sm text-gray-500 hindi-text">कितने बल्ब/लाइट हैं?</p>
+                        </div>
+                    </div>
+                    <select id="bulbs" class="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 text-lg" required>
+                        <option value="">Select / चुनें</option>
+                        <option value="1-5">1-5 bulbs</option>
+                        <option value="6-10">6-10 bulbs</option>
+                        <option value="11+">11+ bulbs</option>
+                    </select>
+                </div>
+
+                <!-- Refrigerator -->
+                <div class="bg-white rounded-xl p-6 shadow-sm border border-gray-100">
+                    <div class="flex items-center mb-4">
+                        <div class="w-10 h-10 bg-green-100 rounded-lg flex items-center justify-center mr-3">
+                            <svg class="w-6 h-6 text-green-600" fill="currentColor" viewBox="0 0 24 24">
+                                <path d="M9,2A1,1 0 0,0 8,3V4H6A2,2 0 0,0 4,6V19A2,2 0 0,0 6,21H18A2,2 0 0,0 20,19V6A2,2 0 0,0 18,4H16V3A1,1 0 0,0 15,2A1,1 0 0,0 14,3V4H10V3A1,1 0 0,0 9,2M6,6H18V10H6V6M6,12H18V19H6V12Z"/>
+                            </svg>
+                        </div>
+                        <div>
+                            <h3 class="text-lg font-semibold text-gray-800">Refrigerator</h3>
+                            <p class="text-sm text-gray-500 hindi-text">क्या आपके पास फ्रिज है?</p>
+                        </div>
+                    </div>
+                    <div class="flex space-x-4">
+                        <button type="button" onclick="selectFridge(true)" id="fridgeYes" class="flex-1 py-3 px-4 border-2 border-gray-300 text-gray-700 rounded-lg font-medium hover:border-gray-400 transition-colors">Yes / हाँ</button>
+                        <button type="button" onclick="selectFridge(false)" id="fridgeNo" class="flex-1 py-3 px-4 border-2 border-gray-300 text-gray-700 rounded-lg font-medium hover:border-gray-400 transition-colors">No / नहीं</button>
+                    </div>
+                    <input type="hidden" id="fridge" required>
+                </div>
+
+                <!-- AC -->
+                <div class="bg-white rounded-xl p-6 shadow-sm border border-gray-100">
+                    <div class="flex items-center mb-4">
+                        <div class="w-10 h-10 bg-cyan-100 rounded-lg flex items-center justify-center mr-3">
+                            <svg class="w-6 h-6 text-cyan-600" fill="currentColor" viewBox="0 0 24 24">
+                                <path d="M6.59,0.66C8.93-1.15 11.47,1.06 12.04,4.5C12.47,4.5 12.89,4.62 13.27,4.84C13.79,4.24 14.25,4.9 14.25,5.5V11.5C14.25,12.1 13.79,12.76 13.27,12.16C12.89,12.38 12.47,12.5 12.04,12.5C11.47,15.94 8.93,18.15 6.59,16.34C5.1,15.28 4.84,13.54 5.62,12.16C4.84,10.78 5.1,9.04 6.59,7.66M12,5.5V11.5H18V5.5H12M19,4V13H20V4H19M21,4V13H22V4H21Z"/>
+                            </svg>
+                        </div>
+                        <div>
+                            <h3 class="text-lg font-semibold text-gray-800">Air Conditioner</h3>
+                            <p class="text-sm text-gray-500 hindi-text">कितने AC हैं?</p>
+                        </div>
+                    </div>
+                    <select id="ac" class="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 text-lg" required>
+                        <option value="">Select / चुनें</option>
+                        <option value="0">0 AC</option>
+                        <option value="1">1 AC</option>
+                        <option value="2">2 AC</option>
+                        <option value="3+">3+ AC</option>
+                    </select>
+                </div>
+
+                <button type="submit" class="w-full bg-blue-600 hover:bg-blue-700 text-white font-semibold py-4 px-6 rounded-xl text-lg transition-colors">
+                    Analyze My Bill / मेरे बिल का विश्लेषण करें
+                </button>
+            </form>
+        </div>
+    </div>
+
+    <!-- Screen 5: Dashboard -->
+    <div id="dashboard" class="screen">
+        <div class="max-w-6xl mx-auto px-4 py-8">
+            <!-- Header -->
+            <div class="text-center mb-8">
+                <h1 class="text-3xl font-bold text-gray-800 mb-2">Energy Analysis Dashboard</h1>
+                <p class="text-gray-600 hindi-text" id="welcomeMessage">आपके बिजली बिल का विश्लेषण</p>
+            </div>
+
+            <!-- Summary Cards -->
+            <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mb-8">
+                <div class="bg-white rounded-xl p-6 shadow-sm border border-gray-100 card-hover animate-fade-in">
+                    <div class="flex items-center justify-between">
+                        <div>
+                            <p class="text-sm text-gray-600 hindi-text">अपलोड किए गए बिल</p>
+                            <p class="text-2xl font-bold text-blue-600" id="totalBills">3</p>
+                        </div>
+                        <div class="w-12 h-12 bg-blue-100 rounded-lg flex items-center justify-center">
+                            <svg class="w-6 h-6 text-blue-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"></path>
+                            </svg>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="bg-white rounded-xl p-6 shadow-sm border border-gray-100 card-hover animate-fade-in">
+                    <div class="flex items-center justify-between">
+                        <div>
+                            <p class="text-sm text-gray-600 hindi-text">औसत बिल राशि</p>
+                            <p class="text-2xl font-bold text-orange-600" id="avgBill">₹1,967</p>
+                        </div>
+                        <div class="w-12 h-12 bg-orange-100 rounded-lg flex items-center justify-center">
+                            <svg class="w-6 h-6 text-orange-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8c-1.657 0-3 .895-3 2s1.343 2 3 2 3 .895 3 2-1.343 2-3 2m0-8c1.11 0 2.08.402 2.599 1M12 8V7m0 1v8m0 0v1m0-1c-1.11 0-2.08-.402-2.599-1"></path>
+                            </svg>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="bg-white rounded-xl p-6 shadow-sm border border-gray-100 card-hover animate-fade-in">
+                    <div class="flex items-center justify-between">
+                        <div>
+                            <p class="text-sm text-gray-600 hindi-text">अपेक्षित बिल</p>
+                            <p class="text-2xl font-bold text-green-600" id="expectedBill">₹1,450</p>
+                        </div>
+                        <div class="w-12 h-12 bg-green-100 rounded-lg flex items-center justify-center">
+                            <svg class="w-6 h-6 text-green-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z"></path>
+                            </svg>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="bg-white rounded-xl p-6 shadow-sm border border-gray-100 card-hover animate-fade-in">
+                    <div class="flex items-center justify-between">
+                        <div>
+                            <p class="text-sm text-gray-600 hindi-text">अधिक भुगतान</p>
+                            <p class="text-2xl font-bold text-red-600" id="overpayment">₹517</p>
+                        </div>
+                        <div class="w-12 h-12 bg-red-100 rounded-lg flex items-center justify-center">
+                            <svg class="w-6 h-6 text-red-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z"></path>
+                            </svg>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Charts Section -->
+            <div class="grid grid-cols-1 lg:grid-cols-2 gap-8 mb-8">
+                <!-- Bill Comparison Chart -->
+                <div class="bg-white rounded-xl p-6 shadow-sm border border-gray-100 animate-fade-in">
+                    <h3 class="text-xl font-semibold text-gray-800 mb-4">Bill Comparison / बिल तुलना</h3>
+                    <canvas id="billChart" width="400" height="300"></canvas>
+                </div>
+
+                <!-- Monthly Trend -->
+                <div class="bg-white rounded-xl p-6 shadow-sm border border-gray-100 animate-fade-in">
+                    <h3 class="text-xl font-semibold text-gray-800 mb-4">Monthly Trend / मासिक रुझान</h3>
+                    <canvas id="trendChart" width="400" height="300"></canvas>
+                </div>
+            </div>
+
+            <!-- Appliance Breakdown -->
+            <div class="bg-white rounded-xl p-6 shadow-sm border border-gray-100 mb-8 animate-fade-in">
+                <h3 class="text-xl font-semibold text-gray-800 mb-6">Appliance Usage / उपकरण उपयोग</h3>
+                <div id="applianceBreakdown" class="space-y-4">
+                    <!-- Will be populated by JavaScript -->
+                </div>
+            </div>
+
+            <!-- AI Suggestions -->
+            <div class="bg-white rounded-xl p-6 shadow-sm border border-gray-100 mb-8 animate-fade-in">
+                <div class="flex items-center justify-between mb-6">
+                    <h3 class="text-xl font-semibold text-gray-800">AI Suggestions / AI सुझाव</h3>
+                    <div class="flex items-center space-x-2">
+                        <span class="text-sm text-gray-500">Potential Savings:</span>
+                        <span class="text-lg font-bold text-green-600" id="potentialSavings">₹600/month</span>
+                    </div>
+                </div>
+
+                <div id="suggestions" class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                    <!-- Will be populated by JavaScript -->
+                </div>
+            </div>
+
+            <!-- Action Buttons -->
+            <div class="flex flex-col sm:flex-row gap-4 justify-center">
+                <button onclick="downloadReport()" class="bg-green-600 hover:bg-green-700 text-white font-semibold py-4 px-8 rounded-xl text-lg flex items-center justify-center space-x-2 transition-colors">
+                    <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 10v6m0 0l-3-3m3 3l3-3m2 8H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"></path>
+                    </svg>
+                    <span>Download Report / रिपोर्ट डाउनलोड करें</span>
+                </button>
+                
+                <button onclick="showScreen('landing')" class="bg-blue-600 hover:bg-blue-700 text-white font-semibold py-4 px-8 rounded-xl text-lg flex items-center justify-center space-x-2 transition-colors">
+                    <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15"></path>
+                    </svg>
+                    <span>New Analysis / नया विश्लेषण</span>
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        let currentScreen = 'landing';
+        let uploadedBillsCount = 0;
+        const screenHistory = [];
+        let fridgeSelected = null;
+
+        // Data storage functions
+        function saveUserData(event) {
+            event.preventDefault();
+            const userData = {
+                name: document.getElementById('userName').value,
+                phone: document.getElementById('userPhone').value,
+                city: document.getElementById('userCity').value
+            };
+            localStorage.setItem('bijliMitra_user', JSON.stringify(userData));
+            showScreen('upload');
+        }
+
+        function saveApplianceData(event) {
+            event.preventDefault();
+            const applianceData = {
+                familyMembers: document.getElementById('familyMembers').value,
+                fans: document.getElementById('fans').value,
+                bulbs: document.getElementById('bulbs').value,
+                fridge: document.getElementById('fridge').value,
+                ac: document.getElementById('ac').value
+            };
+            localStorage.setItem('bijliMitra_appliances', JSON.stringify(applianceData));
+            calculateAndShowResults();
+        }
+
+        function selectFridge(hasRefrigerator) {
+            fridgeSelected = hasRefrigerator;
+            document.getElementById('fridge').value = hasRefrigerator ? 'yes' : 'no';
+            
+            const yesBtn = document.getElementById('fridgeYes');
+            const noBtn = document.getElementById('fridgeNo');
+            
+            // Reset both buttons
+            [yesBtn, noBtn].forEach(btn => {
+                btn.classList.remove('border-green-500', 'bg-green-50', 'text-green-700');
+                btn.classList.add('border-gray-300', 'text-gray-700');
+            });
+            
+            // Highlight selected button
+            const selectedBtn = hasRefrigerator ? yesBtn : noBtn;
+            selectedBtn.classList.remove('border-gray-300', 'text-gray-700');
+            selectedBtn.classList.add('border-green-500', 'bg-green-50', 'text-green-700');
+        }
+
+        function useDemoBills() {
+            const demoBills = [
+                { name: 'demo_bill_jan.pdf', amount: 1800 },
+                { name: 'demo_bill_feb.pdf', amount: 2000 },
+                { name: 'demo_bill_mar.pdf', amount: 2100 }
+            ];
+            
+            localStorage.setItem('bijliMitra_bills', JSON.stringify(demoBills));
+            
+            // Update UI
+            const uploadedBills = document.getElementById('uploadedBills');
+            const progressText = document.getElementById('progressText');
+            const progressBar = document.getElementById('progressBar');
+            const continueBtn = document.getElementById('continueBtn');
+            
+            uploadedBills.innerHTML = '';
+            
+            demoBills.forEach((bill, index) => {
+                const billElement = document.createElement('div');
+                billElement.className = 'flex items-center justify-between bg-green-50 border border-green-200 rounded-lg p-4 animate-fade-in';
+                billElement.innerHTML = `
+                    <div class="flex items-center">
+                        <svg class="w-8 h-8 text-green-600 mr-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"></path>
+                        </svg>
+                        <div>
+                            <p class="font-medium text-gray-800">${bill.name}</p>
+                            <p class="text-sm text-gray-500 hindi-text">राशि: ₹${bill.amount}</p>
+                        </div>
+                    </div>
+                    <div class="text-lg font-bold text-green-600">₹${bill.amount}</div>
+                `;
+                uploadedBills.appendChild(billElement);
+            });
+            
+            uploadedBillsCount = 3;
+            progressText.textContent = '3/3';
+            progressBar.style.width = '100%';
+            
+            continueBtn.disabled = false;
+            continueBtn.classList.remove('opacity-50', 'cursor-not-allowed');
+            continueBtn.classList.add('hover:bg-blue-700');
+        }
+
+        function uploadBill(type) {
+            uploadedBillsCount++;
+            
+            // Simulate bill upload with random amounts
+            const amounts = [1750, 1850, 1950, 2050, 2150];
+            const randomAmount = amounts[Math.floor(Math.random() * amounts.length)];
+            
+            // Update progress
+            const progressText = document.getElementById('progressText');
+            const progressBar = document.getElementById('progressBar');
+            const continueBtn = document.getElementById('continueBtn');
+            
+            progressText.textContent = `${uploadedBillsCount}/3`;
+            progressBar.style.width = `${(uploadedBillsCount / 3) * 100}%`;
+            
+            // Add uploaded bill to the list
+            const uploadedBills = document.getElementById('uploadedBills');
+            const billElement = document.createElement('div');
+            billElement.className = 'flex items-center justify-between bg-green-50 border border-green-200 rounded-lg p-4 animate-fade-in';
+            billElement.innerHTML = `
+                <div class="flex items-center">
+                    <svg class="w-8 h-8 text-green-600 mr-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"></path>
+                    </svg>
+                    <div>
+                        <p class="font-medium text-gray-800">Bill ${uploadedBillsCount} uploaded</p>
+                        <p class="text-sm text-gray-500 hindi-text">राशि: ₹${randomAmount}</p>
+                    </div>
+                </div>
+                <div class="text-lg font-bold text-green-600">₹${randomAmount}</div>
+            `;
+            uploadedBills.appendChild(billElement);
+            
+            // Store bill data
+            let bills = JSON.parse(localStorage.getItem('bijliMitra_bills') || '[]');
+            bills.push({ name: `bill_${uploadedBillsCount}.pdf`, amount: randomAmount });
+            localStorage.setItem('bijliMitra_bills', JSON.stringify(bills));
+            
+            // Enable continue button when at least 1 bill is uploaded
+            if (uploadedBillsCount >= 1) {
+                continueBtn.disabled = false;
+                continueBtn.classList.remove('opacity-50', 'cursor-not-allowed');
+                continueBtn.classList.add('hover:bg-blue-700');
+            }
+        }
+
+        function calculateAndShowResults() {
+            const bills = JSON.parse(localStorage.getItem('bijliMitra_bills') || '[]');
+            const appliances = JSON.parse(localStorage.getItem('bijliMitra_appliances') || '{}');
+            
+            // Calculate expected bill based on appliances
+            let expectedBill = 500; // Base cost
+            
+            // Add costs based on appliances
+            const familySize = appliances.familyMembers;
+            if (familySize === '1-2') expectedBill += 200;
+            else if (familySize === '3-4') expectedBill += 400;
+            else if (familySize === '5-6') expectedBill += 600;
+            else if (familySize === '7+') expectedBill += 800;
+            
+            const fanCount = appliances.fans;
+            if (fanCount === '1-2') expectedBill += 300;
+            else if (fanCount === '3-4') expectedBill += 500;
+            else if (fanCount === '5+') expectedBill += 700;
+            
+            const bulbCount = appliances.bulbs;
+            if (bulbCount === '1-5') expectedBill += 150;
+            else if (bulbCount === '6-10') expectedBill += 250;
+            else if (bulbCount === '11+') expectedBill += 400;
+            
+            if (appliances.fridge === 'yes') expectedBill += 400;
+            
+            const acCount = appliances.ac;
+            if (acCount === '1') expectedBill += 800;
+            else if (acCount === '2') expectedBill += 1500;
+            else if (acCount === '3+') expectedBill += 2200;
+            
+            // Store calculated data
+            const analysisData = {
+                bills: bills,
+                appliances: appliances,
+                expectedBill: expectedBill,
+                avgBill: bills.reduce((sum, bill) => sum + bill.amount, 0) / bills.length,
+                overpayment: bills.reduce((sum, bill) => sum + bill.amount, 0) / bills.length - expectedBill
+            };
+            
+            localStorage.setItem('bijliMitra_analysis', JSON.stringify(analysisData));
+            showScreen('dashboard');
+            loadDashboard();
+        }
+
+        function loadDashboard() {
+            const user = JSON.parse(localStorage.getItem('bijliMitra_user') || '{}');
+            const analysis = JSON.parse(localStorage.getItem('bijliMitra_analysis') || '{}');
+            
+            // Update welcome message
+            document.getElementById('welcomeMessage').textContent = `Welcome ${user.name || 'User'} - आपके बिजली बिल का विश्लेषण`;
+            
+            // Update summary cards
+            document.getElementById('totalBills').textContent = analysis.bills?.length || 0;
+            document.getElementById('avgBill').textContent = `₹${Math.round(analysis.avgBill || 0)}`;
+            document.getElementById('expectedBill').textContent = `₹${analysis.expectedBill || 0}`;
+            document.getElementById('overpayment').textContent = `₹${Math.round(Math.abs(analysis.overpayment || 0))}`;
+            
+            // Load charts
+            loadCharts(analysis);
+            
+            // Load appliance breakdown
+            loadApplianceBreakdown(analysis);
+            
+            // Load suggestions
+            loadSuggestions(analysis);
+        }
+
+        function loadCharts(analysis) {
+            // Bill Comparison Chart
+            const billCtx = document.getElementById('billChart').getContext('2d');
+            new Chart(billCtx, {
+                type: 'bar',
+                data: {
+                    labels: ['Expected Bill', 'Average Actual Bill'],
+                    datasets: [{
+                        label: 'Amount (₹)',
+                        data: [analysis.expectedBill, Math.round(analysis.avgBill)],
+                        backgroundColor: ['#10b981', '#ef4444'],
+                        borderColor: ['#059669', '#dc2626'],
+                        borderWidth: 2
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    plugins: {
+                        legend: {
+                            display: false
+                        }
+                    },
+                    scales: {
+                        y: {
+                            beginAtZero: true,
+                            ticks: {
+                                callback: function(value) {
+                                    return '₹' + value;
+                                }
+                            }
+                        }
+                    }
+                }
+            });
+
+            // Monthly Trend Chart
+            const trendCtx = document.getElementById('trendChart').getContext('2d');
+            const billAmounts = analysis.bills?.map(bill => bill.amount) || [1800, 2000, 2100];
+            new Chart(trendCtx, {
+                type: 'line',
+                data: {
+                    labels: ['Month 1', 'Month 2', 'Month 3'],
+                    datasets: [{
+                        label: 'Bill Amount (₹)',
+                        data: billAmounts,
+                        borderColor: '#3b82f6',
+                        backgroundColor: 'rgba(59, 130, 246, 0.1)',
+                        borderWidth: 3,
+                        fill: true,
+                        tension: 0.4
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    plugins: {
+                        legend: {
+                            display: false
+                        }
+                    },
+                    scales: {
+                        y: {
+                            beginAtZero: false,
+                            ticks: {
+                                callback: function(value) {
+                                    return '₹' + value;
+                                }
+                            }
+                        }
+                    }
+                }
+            });
+        }
+
+        function loadApplianceBreakdown(analysis) {
+            const breakdown = document.getElementById('applianceBreakdown');
+            const appliances = analysis.appliances || {};
+            
+            const applianceData = [
+                { name: 'Fans', hindi: 'पंखे', value: appliances.fans, cost: 300, icon: '🌀' },
+                { name: 'Bulbs/Lights', hindi: 'बल्ब/लाइट', value: appliances.bulbs, cost: 200, icon: '💡' },
+                { name: 'Refrigerator', hindi: 'फ्रिज', value: appliances.fridge === 'yes' ? 'Yes' : 'No', cost: appliances.fridge === 'yes' ? 400 : 0, icon: '❄️' },
+                { name: 'Air Conditioner', hindi: 'AC', value: appliances.ac, cost: appliances.ac === '1' ? 800 : appliances.ac === '2' ? 1500 : appliances.ac === '3+' ? 2200 : 0, icon: '❄️' }
+            ];
+            
+            breakdown.innerHTML = applianceData.map(item => `
+                <div class="flex items-center justify-between p-4 bg-gray-50 rounded-lg">
+                    <div class="flex items-center space-x-3">
+                        <span class="text-2xl">${item.icon}</span>
+                        <div>
+                            <p class="font-medium text-gray-800">${item.name}</p>
+                            <p class="text-sm text-gray-500 hindi-text">${item.hindi}</p>
+                        </div>
+                    </div>
+                    <div class="text-right">
+                        <p class="font-medium text-gray-800">${item.value}</p>
+                        <p class="text-sm text-green-600">₹${item.cost}/month</p>
+                    </div>
+                </div>
+            `).join('');
+        }
+
+        function loadSuggestions(analysis) {
+            const suggestions = document.getElementById('suggestions');
+            const appliances = analysis.appliances || {};
+            
+            const suggestionList = [
+                {
+                    title: 'Reduce fan usage by 2 hours daily',
+                    hindi: 'पंखे का उपयोग दिन में 2 घंटे कम करें',
+                    savings: 200,
+                    icon: '🌀',
+                    color: 'blue'
+                },
+                {
+                    title: 'Switch to LED bulbs',
+                    hindi: 'LED बल्ब का उपयोग करें',
+                    savings: 250,
+                    icon: '💡',
+                    color: 'yellow'
+                },
+                {
+                    title: 'Optimize refrigerator temperature',
+                    hindi: 'फ्रिज का तापमान सही रखें',
+                    savings: appliances.fridge === 'yes' ? 150 : 0,
+                    icon: '❄️',
+                    color: 'green'
+                },
+                {
+                    title: 'Use AC efficiently (26°C)',
+                    hindi: 'AC का सही उपयोग करें (26°C)',
+                    savings: appliances.ac !== '0' ? 300 : 0,
+                    icon: '🌡️',
+                    color: 'cyan'
+                }
+            ].filter(item => item.savings > 0);
+            
+            const totalSavings = suggestionList.reduce((sum, item) => sum + item.savings, 0);
+            document.getElementById('potentialSavings').textContent = `₹${totalSavings}/month`;
+            
+            suggestions.innerHTML = suggestionList.map(item => `
+                <div class="bg-${item.color}-50 border border-${item.color}-200 rounded-lg p-4">
+                    <div class="flex items-start space-x-3">
+                        <span class="text-2xl">${item.icon}</span>
+                        <div class="flex-1">
+                            <p class="font-medium text-gray-800">${item.title}</p>
+                            <p class="text-sm text-gray-600 hindi-text mt-1">${item.hindi}</p>
+                            <p class="text-sm font-medium text-green-600 mt-2">Save: ₹${item.savings}/month</p>
+                        </div>
+                    </div>
+                </div>
+            `).join('');
+        }
+
+        function downloadReport() {
+            const user = JSON.parse(localStorage.getItem('bijliMitra_user') || '{}');
+            const analysis = JSON.parse(localStorage.getItem('bijliMitra_analysis') || '{}');
+            
+            const reportContent = `
+BIJLI MITRA - ENERGY ANALYSIS REPORT
+=====================================
+
+User Information:
+- Name: ${user.name || 'N/A'}
+- Phone: ${user.phone || 'N/A'}
+- City: ${user.city || 'N/A'}
+- Report Date: ${new Date().toLocaleDateString()}
+
+Bill Analysis:
+- Total Bills Analyzed: ${analysis.bills?.length || 0}
+- Average Bill Amount: ₹${Math.round(analysis.avgBill || 0)}
+- Expected Bill Amount: ₹${analysis.expectedBill || 0}
+- Overpayment: ₹${Math.round(Math.abs(analysis.overpayment || 0))}
+
+Appliance Information:
+- Family Members: ${analysis.appliances?.familyMembers || 'N/A'}
+- Fans: ${analysis.appliances?.fans || 'N/A'}
+- Bulbs/Lights: ${analysis.appliances?.bulbs || 'N/A'}
+- Refrigerator: ${analysis.appliances?.fridge || 'N/A'}
+- Air Conditioner: ${analysis.appliances?.ac || 'N/A'}
+
+Energy Saving Recommendations:
+1. Reduce fan usage by 2 hours daily - Save ₹200/month
+2. Switch to LED bulbs - Save ₹250/month
+3. Optimize refrigerator temperature (3-4°C) - Save ₹150/month
+4. Use AC efficiently at 26°C - Save ₹300/month
+
+Total Potential Savings: ₹900/month
+
+Generated by Bijli Mitra - Smart Energy Management System
+            `;
+            
+            const blob = new Blob([reportContent], { type: 'text/plain' });
+            const url = window.URL.createObjectURL(blob);
+            const a = document.createElement('a');
+            a.href = url;
+            a.download = `bijli_report_${user.name || 'user'}.txt`;
+            document.body.appendChild(a);
+            a.click();
+            document.body.removeChild(a);
+            window.URL.revokeObjectURL(url);
+        }
+
+        function checkExistingData() {
+            const analysis = localStorage.getItem('bijliMitra_analysis');
+            if (analysis) {
+                showScreen('dashboard');
+                loadDashboard();
+            } else {
+                alert('No previous analysis found. Please start a new demo.');
+            }
+        }
+
+        function clearData() {
+            localStorage.removeItem('bijliMitra_user');
+            localStorage.removeItem('bijliMitra_bills');
+            localStorage.removeItem('bijliMitra_appliances');
+            localStorage.removeItem('bijliMitra_analysis');
+            
+            // Reset UI
+            uploadedBillsCount = 0;
+            document.getElementById('uploadedBills').innerHTML = '';
+            document.getElementById('progressText').textContent = '0/3';
+            document.getElementById('progressBar').style.width = '0%';
+            
+            const continueBtn = document.getElementById('continueBtn');
+            continueBtn.disabled = true;
+            continueBtn.classList.add('opacity-50', 'cursor-not-allowed');
+            continueBtn.classList.remove('hover:bg-blue-700');
+            
+            showScreen('landing');
+            alert('Demo data cleared successfully!');
+        }
+
+        function showScreen(screenId) {
+            // Hide current screen
+            document.getElementById(currentScreen).classList.remove('active');
+            
+            // Add current screen to history if it's not the same as the new screen
+            if (currentScreen !== screenId) {
+                screenHistory.push(currentScreen);
+            }
+            
+            // Show new screen
+            document.getElementById(screenId).classList.add('active');
+            currentScreen = screenId;
+            
+            // Update back button visibility
+            const backBtn = document.getElementById('backBtn');
+            if (screenId === 'landing') {
+                backBtn.style.display = 'none';
+            } else {
+                backBtn.style.display = 'flex';
+            }
+            
+            // Scroll to top
+            window.scrollTo(0, 0);
+        }
+
+        function goBack() {
+            if (screenHistory.length > 0) {
+                const previousScreen = screenHistory.pop();
+                document.getElementById(currentScreen).classList.remove('active');
+                document.getElementById(previousScreen).classList.add('active');
+                currentScreen = previousScreen;
+                
+                // Update back button visibility
+                const backBtn = document.getElementById('backBtn');
+                if (currentScreen === 'landing') {
+                    backBtn.style.display = 'none';
+                }
+            }
+        }
+
+        // Initialize app
+        document.addEventListener('DOMContentLoaded', function() {
+            // Check if there's existing data on load
+            const existingAnalysis = localStorage.getItem('bijliMitra_analysis');
+            if (existingAnalysis) {
+                // Show dashboard button is already visible
+            }
+        });
+    </script>
+<script>(function(){function c(){var b=a.contentDocument||a.contentWindow.document;if(b){var d=b.createElement('script');d.innerHTML="window.__CF$cv$params={r:'96a4a75c64c50ed9',t:'MTc1NDM3OTcwNC4wMDAwMDA='};var a=document.createElement('script');a.nonce='';a.src='/cdn-cgi/challenge-platform/scripts/jsd/main.js';document.getElementsByTagName('head')[0].appendChild(a);";b.getElementsByTagName('head')[0].appendChild(d)}}if(document.body){var a=document.createElement('iframe');a.height=1;a.width=1;a.style.position='absolute';a.style.top=0;a.style.left=0;a.style.border='none';a.style.visibility='hidden';document.body.appendChild(a);if('loading'!==document.readyState)c();else if(window.addEventListener)document.addEventListener('DOMContentLoaded',c);else{var e=document.onreadystatechange||function(){};document.onreadystatechange=function(b){e(b);'loading'!==document.readyState&&(document.onreadystatechange=e,c())}}}})();</script></body>
+</html>
